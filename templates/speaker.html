@@ -1,0 +1,14 @@
+<h1 class="page-header">Speakers</h1>
+
+
+{% if speakers %}
+	<div>
+		<ul>
+			
+		{% for speaker in speakers %}
+		  <p>{{ speaker }}</p>
+		{% endfor %}
+		
+		</ul>
+	</div>
+{% endif %}
