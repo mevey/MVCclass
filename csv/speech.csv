@@ -1,4 +1,4 @@
-speech.id,previous.speech.id,subsequent.speech.id,hearing.id,conversation,text
+speech_id,previous_speech_id,subsequent_speech_id,hearing_id,conversation,text
 2923502,2923501,2923503,19196,1,"    The Foreign Relations Committee will come to _x000D_
 order._x000D_
     I want to welcome our witness. I understand there may be _x000D_
@@ -18660,7 +18660,7 @@ you to travel. I hope you would not mind. But we do have to get _x000D_
 the actual agency hearing the stories from Wisconsin as well._x000D_
     Mr. Meyer, let me quick start with you. How many years did _x000D_
 you work with the DNR?"
-2924795,2924794,2924796,19237,1,    32.
+2924795,2924794,2924796,19237,1,32
 2924796,2924795,2924797,19237,1,"    32 years. So you have a fair amount of _x000D_
 experience with the DNR."
 2924797,2924796,2924798,19237,1,    I do. I am an older guy.
@@ -22574,7 +22574,7 @@ indication."
 2925210,2925209,2925211,19239,3,"    So, Mr. Tyson, if you would quick grab the _x000D_
 mic there. As long as we are talking about waiting lists, just _x000D_
 real quickly, how--out of a student body of about 800 you said?"
-2925211,2925210,2925212,19239,3,    860.
+2925211,2925210,2925212,19239,3,860
 2925212,2925211,2925213,19239,3,    What's your waiting list?
 2925213,2925212,2925214,19239,3,"    It's somewhere around 300, 330."
 2925214,2925213,2925215,19239,3,"    Almost 35, 40 percent are waiting to get _x000D_
