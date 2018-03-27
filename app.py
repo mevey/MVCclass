@@ -32,8 +32,8 @@ def speakers():
 	"""
 
 	format_ = request.args.get("format", None)
-	speaker = request.args.get("name", None)
-	year = request.args.get("year", None)
+	speaker = request.args.get("name", "")
+	year = request.args.get("year", "")
 
 	connection = sqlite3.connect("mydatabase.sqlite") 
 	connection.row_factory = dictionary_factory
@@ -92,7 +92,8 @@ def speakers():
 		return download_csv(records, "speeches_%s.csv" % (speaker.lower()))
 	else:
 		years = [x for x in range(2018, 1995, -1)]
-		return flask.render_template('speaker.html', records=records, no_of_records=no_of_records[0]['count'], speaker=speaker, years=years, selected_year=int(year))
+		selected_year = int(year) if year else None
+		return flask.render_template('speaker.html', records=records, no_of_records=no_of_records[0]['count'], speaker=speaker, years=years, selected_year=selected_year)
 
 ########################################################################
 # The following are helper functions. They do not have a @app.route decorator
