@@ -32,7 +32,8 @@ def speakers():
 	"""
 
 	format_ = request.args.get("format", None)
-	speaker = request.args.get("name", "")
+	speaker = request.args.get("name", None)
+	year = request.args.get("year", None)
 
 	connection = sqlite3.connect("mydatabase.sqlite") 
 	connection.row_factory = dictionary_factory
@@ -44,15 +45,26 @@ def speakers():
 				speech.hearing_id = hearing.hearing_id inner join speaker \
 				on speaker.speech_id = speech.speech_id %s %s;"
 
-	speaker_where_clause = "where speaker.surname = ?" if speaker else ""
+	where_clause = ""
+	if speaker or year:
+		where_clause = "where "
+		if speaker:
+			where_clause += " speaker.surname = ? " if speaker else ""
+		if year and speaker:
+			where_clause += " and "
+		if year:
+			where_clause += " hearing.date like ? " if len(year)>2 else "" 
 	limit_statement = "limit 20" if format_ != "csv" else ""
 
-	all_records_query = all_records_query % (speaker_where_clause, limit_statement)
-	
+	all_records_query = all_records_query % (where_clause, limit_statement)
 	print(all_records_query)
-	print("_" * 30)
-	if speaker:
+
+	if speaker and year:
+		cursor.execute(all_records_query ,(speaker.lower(), "%"+ year))
+	elif speaker:
 		cursor.execute(all_records_query ,(speaker.lower(),))
+	elif year:
+		cursor.execute(all_records_query ,("%"+ year,))
 	else:
 		cursor.execute(all_records_query)
 	records = cursor.fetchall()
@@ -61,20 +73,26 @@ def speakers():
 	count_query =  "SELECT count(*) as count FROM hearing inner join speech on \
 				speech.hearing_id = hearing.hearing_id inner join speaker \
 				on speaker.speech_id = speech.speech_id %s;"
-	count_query = count_query % (speaker_where_clause)
-	if speaker:
-		cursor.execute(count_query, (speaker.lower(),))
+	count_query = count_query % (where_clause)
+	if speaker and year:
+		cursor.execute(count_query, (speaker.lower(), "%"+ year))
+	elif year:
+		cursor.execute(count_query, ("%"+ year,))
+	elif speaker:
+		cursor.execute(count_query, (speaker.lower()))
 	else:
 		cursor.execute(count_query)
+	#There's a lot of if else going on here but I will send a better solution for you guys to work with
 	no_of_records = cursor.fetchall()
 	connection.close()
 
 	#Send the information back to the view
 	#if the user specified csv send the data as a file for download else visualize the data on the web page
 	if format_ == "csv": 
-		return download_csv(records, "speeches_%s.csv" % (speaker))
+		return download_csv(records, "speeches_%s.csv" % (speaker.lower()))
 	else:
-		return flask.render_template('speaker.html', records=records, no_of_records=no_of_records[0]['count'], speaker=speaker)
+		years = [x for x in range(2018, 1995, -1)]
+		return flask.render_template('speaker.html', records=records, no_of_records=no_of_records[0]['count'], speaker=speaker, years=years, selected_year=int(year))
 
 ########################################################################
 # The following are helper functions. They do not have a @app.route decorator

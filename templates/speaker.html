@@ -13,9 +13,18 @@
 		</div>
 		<br clear="all">
 		<div class="row">
-			<div class="col-md-6">
+			<div class="col-md-3">
 				<input class="form-control" type="text" placeholder="Enter speaker surname" value="{{speaker}}" id="speaker"/>
-				<small>Try rubio, miller, murray, brown</small>
+				<small>Try rubio, shinkman, murray, brown</small>
+			</div>
+			<div class="col-md-3">
+				<select class="form-control" id="year">
+					<option value="">All years</option>
+					{% for year in years %}
+					<option value="{{year}}" {% if selected_year == year %}selected{%endif%}>{{year}}</option>
+					{% endfor %}
+				</select>
+				<small>Try 2015,2016</small>
 			</div>
 			<div class="col-md-3">
 				<button style="width:100%;" class="btn btn-primary" id="filter-btn"><b>Filter</b></button>
