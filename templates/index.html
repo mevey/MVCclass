@@ -1,21 +1,139 @@
 <html>
 <head>
+	<!-- load the bootstrap css here -->
 	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 </head>
 <body>
-	<div class="container">
-		<div class="jumbotron text-center">
-			<h1>Welcome to Capitol Query</h1>
-			
-			
+	<div class="container-fluid" style="padding:30px;">
+		<div class="row">
+			<div class="col-md-12">
+				<h1>Capitol Query</h1>
+				<small>Search the congressional hearings database</small>
+			</div>
 		</div>
-		<div class="row text-center">
-			<a href="/speakers">
-				> Search speeches by a speaker's last name
-			</a>
+		<br clear="all">
+		<div class="row">
+			<div class="col-md-2">
+				<input class="form-control" type="text" placeholder="Enter speaker name" value="{{response.selected_speaker}}" id="speaker"/>
+				<small>Try rubio, shinkman, murray, brown</small>
+			</div>
+			<div class="col-md-2">
+				<select class="form-control" id="year">
+					<option value="">All years</option>
+					{% for year in response.years %}
+					<option value="{{year}}" {% if response.selected_year == year %}selected{%endif%}>{{year}}</option>
+					{% endfor %}
+				</select>
+				<small>Try 2015,2016</small>
+			</div>
+			<div class="col-md-2">
+				<select class="form-control" id="party">
+					<option value="">All parties</option>
+					<option value="D" {% if response.selected_party == "D" %}selected{%endif%}>Democrats</option>
+					<option value="R" {% if response.selected_party == "R" %}selected{%endif%}>Republicans</option>
+					<option value="I" {% if response.selected_party == "O" %}selected{%endif%}>Independent</option>
+				</select>
+			</div>
+			<div class="col-md-2">
+				<select class="form-control" id="state">
+					<option value="">All states</option>
+					{% for state in response.states %}
+					<option value="{{state.name}}" {% if response.selected_state == state.name %}selected{%endif%}>{{state.name}}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class="col-md-2">
+				<select class="form-control" id="committee">
+					<option value="">All committees</option>
+					{% for committee in response.committees %}
+					<option value="{{committee.name}}" {% if response.selected_committee == committee %}selected{%endif%}>{{committee.name}}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class="col-md-2">
+				<select class="form-control" id="quantile">
+					<option value="">All quartiles</option>
+					<option value="1" {% if response.selected_quantile == "1" %}selected{%endif%}>Rural</option>
+					<option value="2" {% if response.selected_quantile == '2' %}selected{%endif%}>Town</option>
+					<option value="3" {% if response.selected_quantile == '3' %}selected{%endif%}>Small City</option>
+					<option value="4" {% if response.selected_quantile == '4' %}selected{%endif%}>Medium City</option>
+					<option value="5" {% if response.selected_quantile == '5' %}selected{%endif%}>Large City</option>
+				</select>
+			</div>
 		</div>
-		
+		<br clear="all">
+		<div class="row">
+			<div class="col-md-4"></div>
+			<div class="col-md-4">
+				<button style="width:100%;" class="btn btn-primary" id="filter-btn"><b>Filter</b></button>
+			</div>
+			<div class="col-md-4"></div>
+		</div>
+
+		<br>
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<b>{{response.no_of_records}} records</b>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12 text-center">
+				<table class="table table-striped thead-dark" style="overflow-x:scroll;">
+					<thead class="text-center">
+						<td>Speaker</td>
+						<td>Honorific</td>
+						<td>Hearing</td>
+						<td>Date</td>
+						<td>Committee </td>
+						<td>Committee Type</td>
+						<td>Party</td>
+						<td>Chamber</td>
+						<td>State</td>
+						<td>District</td>
+						<td>Quantiles</td>
+						<td>Speech</td>
+					</thead>
+					<tbody>
+						{% if (response.records is defined) and response.records %}
+							{% for record in response.records %}
+								<tr>
+									<td>{{record.fullname | title}}</td>
+									<td>{{record.honorific}}</td>
+									<td>{{record.title | title}}</td>
+									<td>{{record.date}}</td>
+									<td>{{record.cname}}</td>
+									<td>{{record.ctype}}</td>
+									<td>{{record.party}}</td>
+									<td>{{record.chamber}}</td>
+									<td>{{record.state}}</td>
+									<td>{{record.district}}</td>
+									<td>{{record.quantiles}}</td>
+									<!-- This line shows just the first 100 characters and cuts it after that -->
+									<td>{{record.text[0:100] + " ..."}}</td>
+								</tr>
+							{% endfor %}
+						{% else %}
+						<tr>
+							<td colspan="12" class="text-center">No results</td>
+						</tr>
+						{% endif %}
+					</tbody>
+				</table>
+				<hr>
+				<p>Sneek peak of what you will download</p>
+				<div class="row">
+					<div class="col-md-4"></div>
+					<div class="col-md-4">
+						<button style="width:100%;" class="btn btn-default" id="download-btn"><b>Download</b></button>
+					</div>
+					<div class="col-md-4"></div>
+				</div>
+			</div>
+		</div>
 	</div>
+	<!-- Load the javascript down here -->
+	<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+	<script src="static/js/main.js"></script>
 </body>
 
 

@@ -9,81 +9,112 @@ import csv
 # Create the application.
 app = flask.Flask(__name__)
 
+
 @app.route('/')
 def index():
-	"""
-	Displays the home page that leads users into different pages
-	"""
-	return flask.render_template('index.html')
- 
-@app.route('/speakers')
-def speakers():
-	"""
-	This is how arguments are passed from the View to this controller
-	The get request can look like this: 
-	/speakers?name=rubio&format=csv
-	This tells the controller to get all speeches by rubio in a csv format
-	/speakers?name=rubio
-	the url above just tells the controller to get speeches by rubio and display them
-	/speakers
-	The url above simply asks for all speeches to be displayed
-	/speakers?format=csv
-	Asks for all speeches to be made available in csv format
-	"""
+	args = {}
 
-	format_ = request.args.get("format", None)
+	format_ = request.args.get("format", "")
 	speaker = request.args.get("name", "")
 	year = request.args.get("year", "")
+	party = request.args.get("party", None)
+	state = request.args.get("state", None)
+	quantile = request.args.get("quantile", None)
+	committee = request.args.get("committee", None)
 
 	connection = sqlite3.connect("mydatabase.sqlite") 
 	connection.row_factory = dictionary_factory
 	cursor = connection.cursor()
 
 	#Query that gets the records that match the query
-	all_records_query = "SELECT hearing.hearing_title as title, hearing.date as date, speech.text as text, \
-				speaker.surname as name FROM hearing inner join speech on \
-				speech.hearing_id = hearing.hearing_id inner join speaker \
-				on speaker.speech_id = speech.speech_id %s %s;"
+	all_records_query = """SELECT
+		person.full_name as fullname,
+		person.honorific as honorific,
+		speech.text as text,
+		hearing.hearing_title as title,
+		hearing.date as date,
+		committee.committee_name as cname,
+		committee.type as ctype,
+		congressmember.party as party,
+		congressmember.chamber as chamber,
+		constituency.state_name as state,
+		constituency.district as district,
+		constituencycharacteristics.density_quintile as quantiles
+		FROM
+		hearing inner join speech on speech.hearing_id = hearing.hearing_id
+		inner join speaker on speaker.speech_id = speech.speech_id
+		inner join committee on committee.committee_id = hearing.committee_id
+		inner join person on person.person_id = speaker.person_id
+		inner join congressmember on congressmember.person_id  = person.person_id
+		inner join constituency on congressmember.constituency_id = constituency.constituency_id
+		inner join constituencycharacteristics on constituencycharacteristics.constituency_id = constituency.constituency_id
+
+		%s %s;"""
 
 	where_clause = ""
-	if speaker or year:
-		where_clause = "where "
+	where_clause_arr = []
+	conditions_tuple = []
+	if speaker or year or party or state or committee or quantile:
 		if speaker:
-			where_clause += " speaker.surname = ? " if speaker else ""
-		if year and speaker:
-			where_clause += " and "
+			where_clause_arr.append(" person.full_name like ? ")
+			conditions_tuple.append("%" + speaker + "%")
 		if year:
-			where_clause += " hearing.date like ? " if len(year)>2 else "" 
-	limit_statement = "limit 20" if format_ != "csv" else ""
+			where_clause_arr.append(" hearing.date like ? " if len(year)>2 else "" )
+			conditions_tuple.append("%" + year + "%")
+		if party:
+			where_clause_arr.append(" congressmember.party = ? " )
+			conditions_tuple.append(party)
+		if state:
+			where_clause_arr.append(" constituency.state_name = ? " )
+			conditions_tuple.append(state)
+		if quantile:
+			where_clause_arr.append(" constituencycharacteristics.density_quintile = ? ")
+			conditions_tuple.append(quantile)
+		if committee:
+			where_clause_arr.append(" committee.committee_name like ? ")
+			conditions_tuple.append("%" + committee + "%")
+		where_clause = "where " + ("and".join(where_clause_arr))
+
+	limit_statement = "limit 10" if format_ != "csv" else ""
 
 	all_records_query = all_records_query % (where_clause, limit_statement)
 	print(all_records_query)
 
-	if speaker and year:
-		cursor.execute(all_records_query ,(speaker.lower(), "%"+ year))
-	elif speaker:
-		cursor.execute(all_records_query ,(speaker.lower(),))
-	elif year:
-		cursor.execute(all_records_query ,("%"+ year,))
-	else:
-		cursor.execute(all_records_query)
+	conditions_tuple = tuple(conditions_tuple)
+	cursor.execute(all_records_query, conditions_tuple)
 	records = cursor.fetchall()
 
 	#Query to count the number of records
-	count_query =  "SELECT count(*) as count FROM hearing inner join speech on \
-				speech.hearing_id = hearing.hearing_id inner join speaker \
-				on speaker.speech_id = speech.speech_id %s;"
+	count_query =  """SELECT count(*) as count
+		FROM
+		hearing inner join speech on speech.hearing_id = hearing.hearing_id
+		inner join speaker on speaker.speech_id = speech.speech_id
+		inner join committee on committee.committee_id = hearing.committee_id
+		inner join person on person.person_id = speaker.person_id
+		inner join congressmember on congressmember.person_id  = person.person_id
+		inner join constituency on congressmember.constituency_id = constituency.constituency_id
+		inner join constituencycharacteristics on constituencycharacteristics.constituency_id = constituency.constituency_id
+		%s;"""
+
 	count_query = count_query % (where_clause)
-	if speaker and year:
-		cursor.execute(count_query, (speaker.lower(), "%"+ year))
-	elif year:
-		cursor.execute(count_query, ("%"+ year,))
-	elif speaker:
-		cursor.execute(count_query, (speaker.lower()))
-	else:
-		cursor.execute(count_query)
+	cursor.execute(count_query, conditions_tuple)
 	#There's a lot of if else going on here but I will send a better solution for you guys to work with
 	no_of_records = cursor.fetchall()
+
+	#Get committees
+	committee_query = """
+		SELECT DISTINCT(committee.committee_name) as name FROM committee;
+	"""
+	cursor.execute(committee_query)
+	committees = cursor.fetchall()
+
+	#states
+	states_query = """
+			SELECT DISTINCT(constituency.state_name) as name FROM constituency;
+		"""
+	cursor.execute(states_query)
+	states = cursor.fetchall()
+
 	connection.close()
 
 	#Send the information back to the view
@@ -92,8 +123,18 @@ def speakers():
 		return download_csv(records, "speeches_%s.csv" % (speaker.lower()))
 	else:
 		years = [x for x in range(2018, 1995, -1)]
-		selected_year = int(year) if year else None
-		return flask.render_template('speaker.html', records=records, no_of_records=no_of_records[0]['count'], speaker=speaker, years=years, selected_year=selected_year)
+		args['records'] = records
+		args['no_of_records'] = no_of_records[0]['count']
+		args['years'] = years
+		args['committees'] = committees
+		args['states'] = states
+		args['selected_speaker'] = speaker
+		args['selected_year'] = int(year) if year else None
+		args['selected_state'] = state
+		args['selected_party'] = party
+		args['selected_committee'] = committee
+		args['selected_quantile'] = quantile
+		return flask.render_template('index.html', response = args)
 
 ########################################################################
 # The following are helper functions. They do not have a @app.route decorator

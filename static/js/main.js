@@ -9,9 +9,19 @@
 $('#filter-btn').click(function() {
 	//Reload the page to display the new data.
 	//You could optionally work with Ajax
-	window.location.href="/speakers?name=" + $("#speaker").val() + "&year=" + $("#year").val()
+	url = "/?name=" + $("#speaker").val() + "&year=" + $("#year").val()
+    url += "&party=" + $("#party").val()
+    url += "&committee=" + $("#committee").val()
+    url += "&state=" + $("#state").val()
+    url += "&quantile=" + $("#quantile").val()
+	window.location.href=url
 });
 
 $('#download-btn').click(function() {
-	window.location.href="/speakers?format=csv&name=" + $("#speaker").val() + "&year=" + $("#year").val()
+    url = "/?format=csv&name=" + $("#speaker").val() + "&year=" + $("#year").val()
+    url += "&party=" + $("#party").val()
+    url += "&committee=" + $("#committee").val()
+    url += "&state=" + $("#state").val()
+    url += "&quantile=" + $("#quantile").val()
+	window.location.href=url
 });
