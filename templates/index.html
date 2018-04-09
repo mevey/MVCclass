@@ -43,12 +43,13 @@
 				</select>
 			</div>
 			<div class="col-md-2">
-				<select class="form-control" id="committee">
-					<option value="">All committees</option>
-					{% for committee in response.committees %}
-					<option value="{{committee.name}}" {% if response.selected_committee == committee %}selected{%endif%}>{{committee.name}}</option>
-					{% endfor %}
-				</select>
+				<input class="form-control" type="text" placeholder="Enter committee name" value="{{response.selected_committee}}" id="committee"/>
+				<!--<select class="form-control" id="committee">-->
+					<!--<option value="">All committees</option>-->
+					<!--{% for committee in response.committees %}-->
+					<!--<option value="{{committee.name}}" {% if response.selected_committee == committee %}selected{%endif%}>{{committee.name}}</option>-->
+					<!--{% endfor %}-->
+				<!--</select>-->
 			</div>
 			<div class="col-md-2">
 				<select class="form-control" id="quantile">

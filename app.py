@@ -20,7 +20,7 @@ def index():
 	party = request.args.get("party", None)
 	state = request.args.get("state", None)
 	quantile = request.args.get("quantile", None)
-	committee = request.args.get("committee", None)
+	committee = request.args.get("committee", "")
 
 	connection = sqlite3.connect("mydatabase.sqlite") 
 	connection.row_factory = dictionary_factory
