@@ -41,6 +41,7 @@
 					<option value="{{state.name}}" {% if response.selected_state == state.name %}selected{%endif%}>{{state.name}}</option>
 					{% endfor %}
 				</select>
+				<small>Try Arizona, Maryland</small>
 			</div>
 			<div class="col-md-2">
 				<input class="form-control" type="text" placeholder="Enter committee name" value="{{response.selected_committee}}" id="committee"/>
