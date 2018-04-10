@@ -120,7 +120,7 @@ def index():
 	#Send the information back to the view
 	#if the user specified csv send the data as a file for download else visualize the data on the web page
 	if format_ == "csv": 
-		return download_csv(records, "speeches_%s.csv" % (speaker.lower()))
+		return download_csv(records, "speeches.csv")
 	else:
 		years = [x for x in range(2018, 1995, -1)]
 		args['records'] = records
