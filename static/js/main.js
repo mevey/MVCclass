@@ -9,9 +9,9 @@
 $('#filter-btn').click(function() {
 	//Reload the page to display the new data.
 	//You could optionally work with Ajax
-	window.location.href="/speakers?name=" + $("#speaker").val() + "&year=" + $("#year").val()
+	window.location.href="/speakers?name=" + $("#speaker").val()
 });
 
 $('#download-btn').click(function() {
-	window.location.href="/speakers?format=csv&name=" + $("#speaker").val() + "&year=" + $("#year").val()
+	window.location.href="/speakers?format=csv&name=" + $("#speaker").val()
 });
